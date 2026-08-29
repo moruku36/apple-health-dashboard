@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="50%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="100%" stop-color="#E11D48"/>
+    </linearGradient>
+    <linearGradient id="ringGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FA5252"/>
+      <stop offset="100%" stop-color="#F03E3E"/>
+    </linearGradient>
+    <linearGradient id="ringGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#51CF66"/>
+      <stop offset="100%" stop-color="#2F9E44"/>
+    </linearGradient>
+    <linearGradient id="ringGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#339AF0"/>
+      <stop offset="100%" stop-color="#1C7ED6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <circle cx="256" cy="256" r="160" stroke="#FA5252" stroke-width="24" fill="none" opacity="0.25" stroke-linecap="round"/>
+  <path d="M 256 96 A 160 160 0 1 1 118 338" stroke="url(#ringGrad1)" stroke-width="24" fill="none" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="126" stroke="#51CF66" stroke-width="24" fill="none" opacity="0.25" stroke-linecap="round"/>
+  <path d="M 256 130 A 126 126 0 1 1 148 321" stroke="url(#ringGrad2)" stroke-width="24" fill="none" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="92" stroke="#339AF0" stroke-width="24" fill="none" opacity="0.25" stroke-linecap="round"/>
+  <path d="M 256 164 A 92 92 0 1 1 190 320" stroke="url(#ringGrad3)" stroke-width="24" fill="none" stroke-linecap="round"/>
+  <path d="M256 225 C240 195 200 195 185 220 C165 255 200 290 256 330 C312 290 347 255 327 220 C312 195 272 195 256 225 Z" fill="url(#heartGrad)" />
+  <path d="M190 260 L220 260 L235 235 L250 285 L265 245 L275 260 L322 260" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>
+</svg>
