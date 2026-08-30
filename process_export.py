@@ -231,6 +231,19 @@ def process_health_data(file_stream):
     start_date = all_dates[0]
     end_date = all_dates[-1]
 
+    # 日別アクティビティヒートマップデータの作成
+    workouts_by_date = {}
+    for w in workouts_list:
+        if w.get("日付"):
+            workouts_by_date[w["日付"]] = w["ワークアウト種目"]
+
+    daily_activity = {}
+    for d in all_dates:
+        daily_activity[d] = {
+            "steps": int(daily_steps[d]),
+            "workout": workouts_by_date.get(d, None)
+        }
+
     months = defaultdict(lambda: {
         "days": set(), "steps": 0.0, "max_step": 0.0, "dist": 0.0, "active_cal": 0.0, "basal_cal": 0.0,
         "resting_hr": [], "hrv": [], "vo2max": [], "spo2": [], "walking_asym": [],
@@ -450,7 +463,9 @@ def process_health_data(file_stream):
         "avgSleep": avg_val(all_sleep),
         "avgVO2Max": avg_val(all_vo2),
         "avgOxygenSaturation": avg_val(all_spo2),
-        "avgWalkingAsymmetry": avg_val(all_asym)
+        "avgWalkingAsymmetry": avg_val(all_asym),
+        "avgDailyStepsGoal": 10000,
+        "avgSleepGoal": 7.5
     }
 
     sorted_workouts = sorted(workouts_list, key=lambda x: x["日付"], reverse=True)[:1000]
@@ -461,7 +476,8 @@ def process_health_data(file_stream):
         "yearly": yearly_result,
         "weekday": weekday_result,
         "workoutSummary": workout_summary,
-        "workouts": sorted_workouts
+        "workouts": sorted_workouts,
+        "dailyActivity": daily_activity
     }
 
 
