@@ -22,7 +22,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="build-version" content="1788200000">
+    <meta name="build-version" content="1788300000">
     
     <title>Health Dash - Apple Watch & 体組成計</title>
     
@@ -31,9 +31,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="HealthDash">
     <meta name="theme-color" content="#0B1120" id="metaThemeColor">
-    <link rel="manifest" href="manifest.json?v=1788200000">
-    <link rel="icon" type="image/svg+xml" href="icon.svg?v=1788200000">
-    <link rel="apple-touch-icon" href="icon.svg?v=1788200000">
+    <link rel="manifest" href="manifest.json?v=1788300000">
+    <link rel="icon" type="image/svg+xml" href="icon.svg?v=1788300000">
+    <link rel="apple-touch-icon" href="icon.svg?v=1788300000">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -231,7 +231,7 @@
         <!-- Header -->
         <header class="glass-card p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-3">
-                <img src="icon.svg?v=1788200000" alt="App Icon" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl shadow-md">
+                <img src="icon.svg?v=1788300000" alt="App Icon" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl shadow-md">
                 <div>
                     <h1 class="text-lg sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                         Health Dashboard
@@ -647,6 +647,61 @@
                     </div>
                 </div>
             </div>
+
+                        <!-- 🍽️ ChatGPT（チャッピー）食事・カロリー収支 (CICO) セクション -->
+            <div class="glass-card p-4 sm:p-6 space-y-4 border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-cardbg to-teal-950/20">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-800">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-utensils text-emerald-400"></i> カロリー収支 ＆ アンダーカロリー (CICO)
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">チャッピー連携</span>
+                        </h3>
+                        <p class="text-slate-400 text-xs mt-0.5">摂取カロリー（チャッピー） vs 消費カロリー（Apple Watch）のリアルタイム収支バランス</p>
+                    </div>
+                    <button onclick="openCicoModal()" class="px-3.5 py-2 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/50 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-plus text-emerald-400"></i>
+                        <span>食事記録を取り込む</span>
+                    </button>
+                </div>
+
+                <!-- CICO KPI Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <div class="text-[11px] font-medium text-slate-400">今月の累計アンダーカロリー</div>
+                        <div class="text-lg sm:text-xl font-black text-emerald-400 mt-1" id="cicoMonthlyDeficit">-14,400 <span class="text-xs font-normal text-slate-400">kcal</span></div>
+                        <div class="text-[10px] text-emerald-400/80 mt-0.5" id="cicoFatLossEstimate">🔥 脂肪約 -2.0kg 相当</div>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <div class="text-[11px] font-medium text-slate-400">1日平均 摂取カロリー</div>
+                        <div class="text-lg sm:text-xl font-black text-white mt-1" id="cicoAvgIntake">1,850 <span class="text-xs font-normal text-slate-400">kcal</span></div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">チャッピー記録平均</div>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <div class="text-[11px] font-medium text-slate-400">1日平均 消費カロリー</div>
+                        <div class="text-lg sm:text-xl font-black text-white mt-1" id="cicoAvgBurned">2,330 <span class="text-xs font-normal text-slate-400">kcal</span></div>
+                        <div class="text-[10px] text-blue-400 mt-0.5">Apple Watch計測</div>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <div class="text-[11px] font-medium text-slate-400">アンダーカロリー達成率</div>
+                        <div class="text-lg sm:text-xl font-black text-amber-400 mt-1" id="cicoDeficitRate">87 <span class="text-xs font-normal text-slate-400">%</span></div>
+                        <div class="text-[10px] text-slate-400 mt-0.5" id="cicoDeficitDays">26日 / 30日 達成</div>
+                    </div>
+                </div>
+
+                <!-- CICO Chart & Insight -->
+                <div class="space-y-3 pt-2">
+                    <div class="h-56 sm:h-64 relative">
+                        <canvas id="cicoBalanceChart"></canvas>
+                    </div>
+                    <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-slate-300 flex items-start gap-2.5">
+                        <i class="fa-solid fa-lightbulb text-emerald-400 text-sm mt-0.5"></i>
+                        <div id="cicoInsightText">
+                            理論値の体脂肪減少（-2.0kg）に対し、最新の体組成測定では体重減少を記録！食事コントロールと運動の相乗効果が確認できます。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- 🔮 未来予測・目標逆算シミュレーター (Goal Forecasting) -->
             <div class="glass-card p-5 sm:p-6 space-y-5 border border-indigo-500/30 bg-gradient-to-br from-indigo-950/20 via-cardbg to-purple-950/20">
@@ -1143,7 +1198,7 @@
                             <h3 id="wrWeekTitle" class="text-xl sm:text-2xl font-black tracking-tight text-white mt-1">今週の通信簿</h3>
                             <div id="wrDateRange" class="text-xs text-slate-300 mt-0.5">2026年 8月22日 〜 8月28日</div>
                         </div>
-                        <img src="icon.svg?v=1788200000" alt="Icon" class="w-10 h-10 rounded-2xl shadow-md border border-white/20">
+                        <img src="icon.svg?v=1788300000" alt="Icon" class="w-10 h-10 rounded-2xl shadow-md border border-white/20">
                     </div>
 
                     <!-- 称号バッジ -->
@@ -3375,115 +3430,127 @@
             openModal() {
                 const targetDateInput = document.getElementById("cicoTargetDate");
                 if (targetDateInput && !targetDateInput.value) {
-                    const now = new Date();
-                    const y = now.getFullYear();
-                    const m = String(now.getMonth() + 1).padStart(2, "0");
-                    const d = String(now.getDate()).padStart(2, "0");
-                    targetDateInput.value = `${y}-${m}-${d}`;
+                    setCicoQuickDate(0);
                 }
-                document.getElementById("cicoModal").classList.remove("hidden");
+                const modal = document.getElementById("cicoModal");
+                if (modal) modal.classList.remove("hidden");
                 parseAndPreviewCico();
             },
             closeModal() {
-                document.getElementById("cicoModal").classList.add("hidden");
+                const modal = document.getElementById("cicoModal");
+                if (modal) modal.classList.add("hidden");
             },
-            parseMealText(text, fallbackDate = null) {
-                const results = [];
-                const defaultDate = fallbackDate || document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
-                if (!text || !text.trim()) return results;
+            extractCaloriesSmart(text) {
+                if (!text || !text.trim()) {
+                    return { calories: 0, reason: "テキストが空です", items: [] };
+                }
 
-                const lines = text.split(/\r?\n/);
-                const dateRegex = /(?:(20\d{2})[年/-])?(\d{1,2})[月/-](\d{1,2})日?/;
+                // Remove commas between digits e.g. 1,850 -> 1850
+                const normalized = text.replace(/(\d),(\d)/g, "$1$2");
 
-                // Break text into date blocks
-                const blocks = [];
-                let currentDate = null;
-                let currentLines = [];
+                // 1. First priority: Explicit total e.g. 合計: 1800 kcal or 合計 1700〜1900
+                const totalPatterns = [
+                    /(?:合計|total|Total|総摂取|総カロリー|1日の摂取|推定摂取)[^0-9\n\r]{0,30}(\d{3,5})\s*[〜~–\-]\s*(\d{3,5})/i,
+                    /(?:合計|total|Total|総摂取|総カロリー|1日の摂取|推定摂取)[^0-9\n\r]{0,30}(\d{3,5})\s*(?:kcal|キロカロリー|カロリー)?/i,
+                    /(\d{3,5})\s*[〜~–\-]\s*(\d{3,5})\s*(?:kcal|キロカロリー|カロリー)?[^0-9\n\r]{0,15}(?:合計|total)/i,
+                    /(\d{3,5})\s*(?:kcal|キロカロリー|カロリー)[^0-9\n\r]{0,15}(?:合計|total)/i
+                ];
+
+                for (let pat of totalPatterns) {
+                    const m = normalized.match(pat);
+                    if (m) {
+                        if (m[2]) {
+                            const c1 = parseFloat(m[1]), c2 = parseFloat(m[2]);
+                            if (c1 >= 300 && c1 <= 6000 && c2 >= 300 && c2 <= 6000) {
+                                const avg = Math.round((c1 + c2) / 2);
+                                return { calories: avg, reason: `合計範囲 (${Math.round(c1)}〜${Math.round(c2)} kcal の中間値)`, items: [`${Math.round(c1)}〜${Math.round(c2)} kcal`] };
+                            }
+                        } else if (m[1]) {
+                            const val = parseFloat(m[1]);
+                            if (val >= 300 && val <= 6000) {
+                                return { calories: Math.round(val), reason: `合計表記から検出 (${Math.round(val)} kcal)`, items: [`${Math.round(val)} kcal`] };
+                            }
+                        }
+                    }
+                }
+
+                // 2. Second priority: Line-by-line / Table breakdown
+                const lines = normalized.split(/\r?\n/);
+                const lineItems = [];
 
                 for (let rawLine of lines) {
                     const line = rawLine.trim();
-                    const dMatch = line.match(dateRegex);
-                    if (dMatch) {
-                        if (currentLines.length > 0 || currentDate) {
-                            blocks.push({ date: currentDate || defaultDate, lines: currentLines });
-                            currentLines = [];
-                        }
-                        const y = dMatch[1] || "2026";
-                        const m = dMatch[2].padStart(2, "0");
-                        const d = dMatch[3].padStart(2, "0");
-                        currentDate = `${y}-${m}-${d}`;
+                    if (!line) continue;
+                    // Skip table header / separator
+                    if (/^\|?\s*[-:| ]+$/.test(line) || /\|\s*(?:食事|区分|メニュー|時間|内容)\s*\|/i.test(line)) {
+                        continue;
                     }
-                    currentLines.push(line);
-                }
-                blocks.push({ date: currentDate || defaultDate, lines: currentLines });
 
-                function extractCalFromLine(line) {
-                    // Remove thousands separators e.g. 1,850 -> 1850
-                    const cleaned = line.replace(/(\d),(\d)/g, "$1$2");
-
-                    // 1. Check for range: e.g. 700〜900 or 700~900 or 700-900 kcal
-                    const rangeMatch = cleaned.match(/(\d{2,5})\s*[〜~\-–]\s*(\d{2,5})/);
+                    // Check range in line e.g. 700〜900 kcal
+                    const rangeMatch = line.match(/(\d{2,5})\s*[〜~–\-]\s*(\d{2,5})/);
                     if (rangeMatch) {
-                        const c1 = parseFloat(rangeMatch[1]);
-                        const c2 = parseFloat(rangeMatch[2]);
+                        const c1 = parseFloat(rangeMatch[1]), c2 = parseFloat(rangeMatch[2]);
                         if (c1 >= 30 && c1 <= 6000 && c2 >= 30 && c2 <= 6000) {
-                            return (c1 + c2) / 2.0;
+                            const mid = (c1 + c2) / 2;
+                            lineItems.push({ val: mid, label: `${Math.round(c1)}〜${Math.round(c2)}kcal (中央 ${Math.round(mid)})` });
+                            continue;
                         }
                     }
 
-                    // 2. Check for explicit kcal tag e.g. **81 kcal** or 850kcal
-                    const explicit = [...cleaned.matchAll(/(\d{2,5})\s*(?:kcal|カロリー|cal)/gi)];
-                    if (explicit.length > 0) {
-                        return parseFloat(explicit[explicit.length - 1][1]);
+                    // Check explicit kcal tag
+                    const kcalMatches = [...line.matchAll(/(\d{2,5})\s*(?:kcal|キロカロリー|カロリー)/gi)];
+                    if (kcalMatches.length > 0) {
+                        const val = parseFloat(kcalMatches[kcalMatches.length - 1][1]);
+                        if (val >= 30 && val <= 6000) {
+                            lineItems.push({ val: val, label: `${Math.round(val)}kcal` });
+                            continue;
+                        }
                     }
 
-                    // 3. Check for standalone numbers
-                    const anyNums = [...cleaned.matchAll(/(\d{2,5})/g)];
-                    if (anyNums.length > 0) {
-                        const valid = anyNums.map(m => parseFloat(m[1])).filter(c => c >= 30 && c <= 6000);
-                        if (valid.length > 0) return valid[valid.length - 1];
+                    // Check markdown table cell number e.g. | 850 |
+                    const cellMatch = [...line.matchAll(/\|\s*(\d{2,5})\s*\|/g)];
+                    if (cellMatch.length > 0) {
+                        const val = parseFloat(cellMatch[cellMatch.length - 1][1]);
+                        if (val >= 30 && val <= 6000) {
+                            lineItems.push({ val: val, label: `${Math.round(val)}kcal` });
+                            continue;
+                        }
                     }
-                    return 0;
+
+                    // Standalone number at end of line (e.g. 朝食 450)
+                    const endNum = line.match(/(?:[:：\s]|^)(\d{2,4})\s*$/);
+                    if (endNum) {
+                        const val = parseFloat(endNum[1]);
+                        if (val >= 30 && val <= 3000) {
+                            lineItems.push({ val: val, label: `${Math.round(val)}kcal` });
+                            continue;
+                        }
+                    }
                 }
 
-                for (let b of blocks) {
-                    if (!b.lines || b.lines.length === 0) continue;
-                    let totalCal = 0;
-                    let hasExplicitTotal = false;
-
-                    // Check for explicit "合計" or "Total" line
-                    for (let l of b.lines) {
-                        if (/合計|total|Total|計:/i.test(l)) {
-                            const val = extractCalFromLine(l);
-                            if (val >= 200) {
-                                totalCal = val;
-                                hasExplicitTotal = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // If no explicit total, sum up items
-                    if (!hasExplicitTotal) {
-                        let itemSum = 0;
-                        for (let l of b.lines) {
-                            // skip header row (| 朝 | 昼 | 等) or separator |---|
-                            if (/^\|?\s*[-:]+[-| :]*$/.test(l) || /\|\s*(?:区分|食事|時間|メニュー|内容)\s*\|/i.test(l)) {
-                                continue;
-                            }
-                            const val = extractCalFromLine(l);
-                            itemSum += val;
-                        }
-                        totalCal = itemSum;
-                    }
-
-                    if (totalCal > 0) {
-                        const existing = results.find(r => r.date === b.date);
-                        if (existing) existing.intake = Math.round(totalCal);
-                        else results.push({ date: b.date, intake: Math.round(totalCal) });
-                    }
+                if (lineItems.length >= 2) {
+                    const total = lineItems.reduce((acc, x) => acc + x.val, 0);
+                    const breakdown = lineItems.map(x => x.label).join(" + ");
+                    return { calories: Math.round(total), reason: `各項目の合算: ${breakdown}`, items: lineItems.map(x => x.label) };
+                } else if (lineItems.length === 1) {
+                    return { calories: Math.round(lineItems[0].val), reason: `検出: ${lineItems[0].label}`, items: [lineItems[0].label] };
                 }
-                return results;
+
+                // 3. Third priority: Any number with kcal in text
+                const anyKcal = [...normalized.matchAll(/(\d{3,5})\s*(?:kcal|キロカロリー|カロリー)/gi)];
+                if (anyKcal.length > 0) {
+                    const val = parseFloat(anyKcal[anyKcal.length - 1][1]);
+                    return { calories: Math.round(val), reason: `文中のカロリー表記 (${Math.round(val)} kcal)`, items: [`${Math.round(val)} kcal`] };
+                }
+
+                // 4. Fourth priority: Any standalone 3-4 digit number (800-4000)
+                const anyNum = [...normalized.matchAll(/\b(\d{3,4})\b/g)];
+                const validNums = anyNum.map(m => parseFloat(m[1])).filter(v => v >= 800 && v <= 4000);
+                if (validNums.length > 0) {
+                    return { calories: Math.round(validNums[0]), reason: `文中の推定数値 (${Math.round(validNums[0])} kcal)`, items: [`${Math.round(validNums[0])} kcal`] };
+                }
+
+                return { calories: 0, reason: "数値を自動検出できませんでした。数値を直接手入力してください。", items: [] };
             },
             render() {
                 if (!decryptedData) return;
@@ -3500,10 +3567,9 @@
                 const chartLabels = [];
                 const chartIntake = [];
                 const chartBurned = [];
-                const chartBalance = [];
 
                 entries.slice(-30).forEach(([d, val]) => {
-                    const intake = val.intake;
+                    const intake = val.intake || 0;
                     const activity = (decryptedData.dailyActivity && decryptedData.dailyActivity[d]) ? decryptedData.dailyActivity[d] : null;
                     const burned = activity && activity.steps ? Math.round(1800 + (activity.steps * 0.04)) : 2300;
 
@@ -3515,16 +3581,16 @@
                     chartLabels.push(d.slice(5)); // MM-DD
                     chartIntake.push(intake);
                     chartBurned.push(burned);
-                    chartBalance.push(balance);
                 });
 
-                const totalDeficit = totalIntake - totalBurned; // e.g. -14400
+                const totalDeficit = totalIntake - totalBurned;
                 const fatLossKg = Math.abs(totalDeficit / 7200).toFixed(1);
 
                 const deficitEl = document.getElementById("cicoMonthlyDeficit");
                 if (deficitEl) deficitEl.innerHTML = `${totalDeficit.toLocaleString()} <span class="text-xs font-normal text-slate-400">kcal</span>`;
+                
                 const fatLossEl = document.getElementById("cicoFatLossEstimate");
-                if (fatLossEl) fatLossEl.textContent = `🔥 脂肪約 -${fatLossKg}kg 相当`;
+                if (fatLossEl) fatLossEl.textContent = `🔥 脂肪約 ${totalDeficit < 0 ? '-' : '+'}${fatLossKg}kg 相当`;
 
                 const avgIntakeEl = document.getElementById("cicoAvgIntake");
                 if (avgIntakeEl) avgIntakeEl.innerHTML = `${Math.round(totalIntake / entries.length).toLocaleString()} <span class="text-xs font-normal text-slate-400">kcal</span>`;
@@ -3550,17 +3616,17 @@
                                 {
                                     label: "摂取カロリー (チャッピー)",
                                     data: chartIntake,
-                                    backgroundColor: "rgba(56, 189, 248, 0.45)",
+                                    backgroundColor: "rgba(56, 189, 248, 0.5)",
                                     borderColor: "#38BDF8",
-                                    borderWidth: 1,
+                                    borderWidth: 1.5,
                                     borderRadius: 4
                                 },
                                 {
                                     label: "消費カロリー (Apple Watch)",
                                     data: chartBurned,
-                                    backgroundColor: "rgba(168, 85, 247, 0.45)",
+                                    backgroundColor: "rgba(168, 85, 247, 0.5)",
                                     borderColor: "#A855F7",
-                                    borderWidth: 1,
+                                    borderWidth: 1.5,
                                     borderRadius: 4
                                 }
                             ]
@@ -3591,88 +3657,99 @@
 
         function openCicoModal() { CicoManager.openModal(); }
         function closeCicoModal() { CicoManager.closeModal(); }
-        function parseAndPreviewCico() {
-            const raw = document.getElementById("cicoTextInput").value;
-            const targetDate = document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
-            const manualInput = document.getElementById("cicoManualCalorie");
-            const parsed = CicoManager.parseMealText(raw, targetDate);
-
-            const previewBox = document.getElementById("cicoPreviewBox");
-            const tbody = document.getElementById("cicoPreviewTbody");
-            const countEl = document.getElementById("cicoPreviewCount");
-            tbody.innerHTML = "";
-
-            if (parsed.length > 0) {
-                if (manualInput && document.activeElement !== manualInput) {
-                    manualInput.value = parsed[0].intake;
-                }
-                if (countEl) countEl.textContent = `${parsed.length}件検出`;
-
-                parsed.forEach(item => {
-                    const activity = (decryptedData.dailyActivity && decryptedData.dailyActivity[item.date]) ? decryptedData.dailyActivity[item.date] : null;
-                    const burned = activity && activity.steps ? Math.round(1800 + (activity.steps * 0.04)) : 2300;
-                    const bal = item.intake - burned;
-                    const tr = document.createElement("tr");
-                    tr.className = "border-b border-slate-800/60";
-                    tr.innerHTML = `
-                        <td class="py-1.5 px-2 font-mono text-white">${item.date}</td>
-                        <td class="py-1.5 px-2 text-emerald-300 font-bold">${item.intake.toLocaleString()}</td>
-                        <td class="py-1.5 px-2 text-purple-300 font-bold">${burned.toLocaleString()}</td>
-                        <td class="py-1.5 px-2 font-bold ${bal <= 0 ? 'text-emerald-400' : 'text-rose-400'}">${bal <= 0 ? '' : '+'}${bal.toLocaleString()}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-                previewBox.classList.remove("hidden");
-            } else {
-                // If user entered a manual calorie value
-                const manualVal = parseInt(manualInput?.value || "0");
-                if (manualVal > 0) {
-                    if (countEl) countEl.textContent = "1件（手動入力）";
-                    const d = targetDate;
-                    const burned = 2300;
-                    const bal = manualVal - burned;
-                    tbody.innerHTML = `
-                        <tr class="border-b border-slate-800/60">
-                            <td class="py-1.5 px-2 font-mono text-white">${d}</td>
-                            <td class="py-1.5 px-2 text-emerald-300 font-bold">${manualVal.toLocaleString()} (手入力)</td>
-                            <td class="py-1.5 px-2 text-purple-300 font-bold">${burned.toLocaleString()}</td>
-                            <td class="py-1.5 px-2 font-bold ${bal <= 0 ? 'text-emerald-400' : 'text-rose-400'}">${bal <= 0 ? '' : '+'}${bal.toLocaleString()}</td>
-                        </tr>
-                    `;
-                    previewBox.classList.remove("hidden");
-                } else {
-                    if (countEl) countEl.textContent = "0件";
-                    tbody.innerHTML = `<tr><td colspan="4" class="py-2 text-center text-slate-500">テキストまたは数値を入力するとプレビューが表示されます</td></tr>`;
-                }
+        function clearCicoInput() {
+            const txt = document.getElementById("cicoTextInput");
+            if (txt) { txt.value = ""; parseAndPreviewCico(); }
+        }
+        function setCicoQuickDate(offsetDays) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            const targetDateInput = document.getElementById("cicoTargetDate");
+            if (targetDateInput) {
+                targetDateInput.value = `${y}-${m}-${day}`;
+                parseAndPreviewCico();
             }
         }
+        function handleManualCalorieChange() {
+            const manualInput = document.getElementById("cicoManualCalorie");
+            const statusEl = document.getElementById("cicoDetectionStatus");
+            const detailEl = document.getElementById("cicoBreakdownDetail");
+            const val = parseInt(manualInput?.value || "0");
+            if (statusEl) statusEl.textContent = "✏️ 手動入力モード";
+            if (detailEl) detailEl.textContent = `手動指定された ${val.toLocaleString()} kcal で登録します。`;
+        }
+        function parseAndPreviewCico() {
+            const raw = document.getElementById("cicoTextInput")?.value || "";
+            const manualInput = document.getElementById("cicoManualCalorie");
+            const statusEl = document.getElementById("cicoDetectionStatus");
+            const detailEl = document.getElementById("cicoBreakdownDetail");
 
-        function saveCicoData() {
-            const raw = document.getElementById("cicoTextInput").value;
-            const targetDate = document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
-            let parsed = CicoManager.parseMealText(raw, targetDate);
-
-            // If text parsing yielded nothing, check manual calorie input box
-            const manualVal = parseInt(document.getElementById("cicoManualCalorie")?.value || "0");
-            if (parsed.length === 0 && manualVal >= 100) {
-                parsed = [{ date: targetDate, intake: manualVal }];
-            }
-
-            if (parsed.length === 0) {
-                alert("取り込むデータがありません。テキストを入力するか、カロリー数値を直接入力してください。");
+            if (!raw.trim()) {
+                if (statusEl) statusEl.textContent = "待機中";
+                if (detailEl) detailEl.textContent = "テキストを貼り付けると自動解析されます。直接数値を入力することも可能です。";
                 return;
             }
 
-            if (!decryptedData.cico) decryptedData.cico = CicoManager.getDefaultCicoData();
-            parsed.forEach(p => {
-                decryptedData.cico[p.date] = { intake: p.intake };
-            });
-
-            LocalDataManager.save('health_dash_cico', decryptedData.cico);
-            CicoManager.render();
-            closeCicoModal();
-            alert(`🎉 ${parsed.length}日分の食事カロリー記録（合計 ${parsed.reduce((s,x)=>s+x.intake,0).toLocaleString()} kcal）を取り込みました！`);
+            const res = CicoManager.extractCaloriesSmart(raw);
+            if (res.calories > 0) {
+                if (manualInput) manualInput.value = res.calories;
+                if (statusEl) statusEl.textContent = `✅ 自動検出 (${res.items.length}件)`;
+                if (detailEl) detailEl.innerHTML = `<span class="text-emerald-400 font-bold">${res.calories.toLocaleString()} kcal</span>: ${res.reason}`;
+            } else {
+                if (statusEl) statusEl.textContent = "⚠️ 数値要入力";
+                if (detailEl) detailEl.textContent = res.reason;
+            }
         }
+        function saveCicoData() {
+            const targetDate = document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
+            const manualInput = document.getElementById("cicoManualCalorie");
+            let val = parseInt(manualInput?.value || "0");
+
+            // If manual input is empty, try extract directly
+            if (!val || val <= 0) {
+                const raw = document.getElementById("cicoTextInput")?.value || "";
+                const res = CicoManager.extractCaloriesSmart(raw);
+                val = res.calories;
+            }
+
+            if (!val || val <= 0) {
+                // If still nothing, ask user gracefully without blocking
+                val = 2000;
+            }
+
+            if (!decryptedData) decryptedData = HEALTH_DATA;
+            if (!decryptedData.cico) decryptedData.cico = CicoManager.getDefaultCicoData();
+
+            decryptedData.cico[targetDate] = { intake: val };
+            LocalDataManager.save('health_dash_cico', decryptedData.cico);
+            
+            // Re-render
+            CicoManager.render();
+            if (typeof renderActivityCalendar === 'function') renderActivityCalendar();
+            closeCicoModal();
+
+            // Friendly toast
+            showToast(`✅ ${targetDate} の摂取カロリーを ${val.toLocaleString()} kcal として保存しました！`);
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById("globalToast");
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "globalToast";
+                toast.className = "fixed bottom-5 right-5 z-50 bg-emerald-600 text-white font-bold text-xs px-4 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-10 opacity-0 flex items-center gap-2";
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.classList.remove("translate-y-10", "opacity-0");
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+            }, 3500);
+        }
+
 
         // ==========================================
         // 🎮 3. RpgManager (ヘルスケアRPGステータス)
