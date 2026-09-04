@@ -1513,25 +1513,45 @@
                 </div>
             </div>
 
-            <div class="space-y-3 text-xs">
+            <div class="space-y-3.5 text-xs">
+                <!-- Date & Manual Calorie Adjustment Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div>
+                        <label class="font-bold text-slate-300 block mb-1">📅 対象日:</label>
+                        <input type="date" id="cicoTargetDate" onchange="parseAndPreviewCico()" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-emerald-500">
+                        <span class="text-[10px] text-slate-400 block mt-0.5">※テキスト内に日付がない場合、この日付で登録</span>
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-300 block mb-1">🔢 摂取カロリー合計 (手動調整可):</label>
+                        <div class="flex items-center gap-1.5">
+                            <input type="number" id="cicoManualCalorie" oninput="parseAndPreviewCico()" placeholder="自動抽出 または 手入力" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-black text-sm text-emerald-400 focus:outline-none focus:border-emerald-500">
+                            <span class="text-xs text-slate-400 font-bold">kcal</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">※解析結果が自動入力され、数値の微修正も可能</span>
+                    </div>
+                </div>
+
                 <div>
                     <label class="font-bold text-slate-300 block mb-1">📋 チャッピーのテキストを貼り付け:</label>
-                    <textarea id="cicoTextInput" rows="5" placeholder="例:&#10;2026-08-20: 朝450, 昼750, 夜650 (合計 1850kcal)&#10;2026-08-21: 1920kcal&#10;2026-08-22: 1780" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
-                    <p class="text-[11px] text-slate-400 mt-1">※ 日付とカロリー数値が含まれていれば、自由な文章形式でも自動抽出します。</p>
+                    <textarea id="cicoTextInput" oninput="parseAndPreviewCico()" rows="5" placeholder="| 朝 | 納豆トースト | 450 kcal |&#10;| 昼 | パスタ | 750 kcal |&#10;| 夜 | 和食 | 650 kcal |&#10;など、マークダウン表・範囲表記（700〜900kcal）・合計など何でも自動認識します。" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
+                    <p class="text-[11px] text-slate-400 mt-1">※ 貼り付けると即座に自動解析されます。「700〜900kcal」のような範囲表記も自動で中間値（800kcal）を計算します。</p>
                 </div>
 
                 <div class="flex gap-2">
-                    <button onclick="parseAndPreviewCico()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 rounded-xl font-bold transition">
-                        <i class="fa-solid fa-magnifying-glass mr-1"></i> 解析プレビュー
+                    <button onclick="parseAndPreviewCico()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 rounded-xl font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-magnifying-glass"></i> 解析プレビュー
                     </button>
-                    <button onclick="saveCicoData()" id="saveCicoBtn" class="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl shadow-lg shadow-emerald-600/20 transition">
-                        <i class="fa-solid fa-check mr-1"></i> データ保存
+                    <button onclick="saveCicoData()" id="saveCicoBtn" class="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> データ保存
                     </button>
                 </div>
 
                 <!-- Live Preview Table -->
-                <div id="cicoPreviewBox" class="hidden space-y-2 pt-2 border-t border-slate-800">
-                    <div class="font-bold text-slate-300">抽出プレビュー:</div>
+                <div id="cicoPreviewBox" class="space-y-2 pt-2 border-t border-slate-800">
+                    <div class="font-bold text-slate-300 flex items-center justify-between">
+                        <span>抽出プレビュー:</span>
+                        <span id="cicoPreviewCount" class="text-[10px] text-emerald-400">1件検出</span>
+                    </div>
                     <div class="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 p-2">
                         <table class="w-full text-[11px]">
                             <thead>
@@ -1548,6 +1568,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- ⚡ iPhone「ショートカット」1タップ同期モーダル -->
@@ -3352,50 +3373,114 @@
         const CicoManager = {
             chartInstance: null,
             openModal() {
+                const targetDateInput = document.getElementById("cicoTargetDate");
+                if (targetDateInput && !targetDateInput.value) {
+                    const now = new Date();
+                    const y = now.getFullYear();
+                    const m = String(now.getMonth() + 1).padStart(2, "0");
+                    const d = String(now.getDate()).padStart(2, "0");
+                    targetDateInput.value = `${y}-${m}-${d}`;
+                }
                 document.getElementById("cicoModal").classList.remove("hidden");
+                parseAndPreviewCico();
             },
             closeModal() {
                 document.getElementById("cicoModal").classList.add("hidden");
             },
-            parseMealText(text) {
+            parseMealText(text, fallbackDate = null) {
                 const results = [];
-                const lines = text.split(/\r?\n/);
-                const dateRegex = /(?:20\d{2}[-/])?\d{1,2}[-/]\d{1,2}/;
-                const calRegex = /(\d{3,5})\s*(?:kcal|カロリー|cal)?/i;
+                const defaultDate = fallbackDate || document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
+                if (!text || !text.trim()) return results;
 
+                const lines = text.split(/\r?\n/);
+                const dateRegex = /(?:(20\d{2})[年/-])?(\d{1,2})[月/-](\d{1,2})日?/;
+
+                // Break text into date blocks
+                const blocks = [];
                 let currentDate = null;
+                let currentLines = [];
+
                 for (let rawLine of lines) {
                     const line = rawLine.trim();
-                    if (!line) continue;
-
-                    const dateMatch = line.match(dateRegex);
-                    if (dateMatch) {
-                        let dStr = dateMatch[0].replace(/\//g, "-");
-                        if (!dStr.startsWith("202")) {
-                            dStr = "2026-" + (dStr.length <= 4 ? "0" + dStr : dStr);
+                    const dMatch = line.match(dateRegex);
+                    if (dMatch) {
+                        if (currentLines.length > 0 || currentDate) {
+                            blocks.push({ date: currentDate || defaultDate, lines: currentLines });
+                            currentLines = [];
                         }
-                        const parts = dStr.split("-");
-                        if (parts.length === 3) {
-                            currentDate = `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
+                        const y = dMatch[1] || "2026";
+                        const m = dMatch[2].padStart(2, "0");
+                        const d = dMatch[3].padStart(2, "0");
+                        currentDate = `${y}-${m}-${d}`;
+                    }
+                    currentLines.push(line);
+                }
+                blocks.push({ date: currentDate || defaultDate, lines: currentLines });
+
+                function extractCalFromLine(line) {
+                    // Remove thousands separators e.g. 1,850 -> 1850
+                    const cleaned = line.replace(/(\d),(\d)/g, "$1$2");
+
+                    // 1. Check for range: e.g. 700〜900 or 700~900 or 700-900 kcal
+                    const rangeMatch = cleaned.match(/(\d{2,5})\s*[〜~\-–]\s*(\d{2,5})/);
+                    if (rangeMatch) {
+                        const c1 = parseFloat(rangeMatch[1]);
+                        const c2 = parseFloat(rangeMatch[2]);
+                        if (c1 >= 30 && c1 <= 6000 && c2 >= 30 && c2 <= 6000) {
+                            return (c1 + c2) / 2.0;
                         }
                     }
 
-                    // Look for calorie numbers (prefer numbers explicitly tagged with kcal, or larger standalone numbers)
-                    const matches = [...line.matchAll(/(\d{3,5})\s*(?:kcal|カロリー)?/gi)];
-                    if (matches.length > 0 && currentDate) {
-                        // find the best number for total calories
-                        let cals = 0;
-                        if (line.includes("合計") || line.includes("total") || matches.length === 1) {
-                            cals = parseInt(matches[matches.length - 1][1]);
-                        } else {
-                            // sum up meal items if line specifies items
-                            cals = matches.reduce((acc, m) => acc + parseInt(m[1]), 0);
+                    // 2. Check for explicit kcal tag e.g. **81 kcal** or 850kcal
+                    const explicit = [...cleaned.matchAll(/(\d{2,5})\s*(?:kcal|カロリー|cal)/gi)];
+                    if (explicit.length > 0) {
+                        return parseFloat(explicit[explicit.length - 1][1]);
+                    }
+
+                    // 3. Check for standalone numbers
+                    const anyNums = [...cleaned.matchAll(/(\d{2,5})/g)];
+                    if (anyNums.length > 0) {
+                        const valid = anyNums.map(m => parseFloat(m[1])).filter(c => c >= 30 && c <= 6000);
+                        if (valid.length > 0) return valid[valid.length - 1];
+                    }
+                    return 0;
+                }
+
+                for (let b of blocks) {
+                    if (!b.lines || b.lines.length === 0) continue;
+                    let totalCal = 0;
+                    let hasExplicitTotal = false;
+
+                    // Check for explicit "合計" or "Total" line
+                    for (let l of b.lines) {
+                        if (/合計|total|Total|計:/i.test(l)) {
+                            const val = extractCalFromLine(l);
+                            if (val >= 200) {
+                                totalCal = val;
+                                hasExplicitTotal = true;
+                                break;
+                            }
                         }
-                        if (cals >= 500 && cals <= 5000) {
-                            const existing = results.find(r => r.date === currentDate);
-                            if (existing) existing.intake = cals;
-                            else results.push({ date: currentDate, intake: cals });
+                    }
+
+                    // If no explicit total, sum up items
+                    if (!hasExplicitTotal) {
+                        let itemSum = 0;
+                        for (let l of b.lines) {
+                            // skip header row (| 朝 | 昼 | 等) or separator |---|
+                            if (/^\|?\s*[-:]+[-| :]*$/.test(l) || /\|\s*(?:区分|食事|時間|メニュー|内容)\s*\|/i.test(l)) {
+                                continue;
+                            }
+                            const val = extractCalFromLine(l);
+                            itemSum += val;
                         }
+                        totalCal = itemSum;
+                    }
+
+                    if (totalCal > 0) {
+                        const existing = results.find(r => r.date === b.date);
+                        if (existing) existing.intake = Math.round(totalCal);
+                        else results.push({ date: b.date, intake: Math.round(totalCal) });
                     }
                 }
                 return results;
@@ -3419,7 +3504,6 @@
 
                 entries.slice(-30).forEach(([d, val]) => {
                     const intake = val.intake;
-                    // match with dailyActivity burned or default 2300
                     const activity = (decryptedData.dailyActivity && decryptedData.dailyActivity[d]) ? decryptedData.dailyActivity[d] : null;
                     const burned = activity && activity.steps ? Math.round(1800 + (activity.steps * 0.04)) : 2300;
 
@@ -3496,7 +3580,6 @@
                 }
             },
             getDefaultCicoData() {
-                // Generate baseline realistic sample data for 2026-08 if none saved
                 const def = {};
                 for (let i = 1; i <= 28; i++) {
                     const d = `2026-08-${String(i).padStart(2, '0')}`;
@@ -3510,49 +3593,85 @@
         function closeCicoModal() { CicoManager.closeModal(); }
         function parseAndPreviewCico() {
             const raw = document.getElementById("cicoTextInput").value;
-            const parsed = CicoManager.parseMealText(raw);
+            const targetDate = document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
+            const manualInput = document.getElementById("cicoManualCalorie");
+            const parsed = CicoManager.parseMealText(raw, targetDate);
+
             const previewBox = document.getElementById("cicoPreviewBox");
             const tbody = document.getElementById("cicoPreviewTbody");
+            const countEl = document.getElementById("cicoPreviewCount");
             tbody.innerHTML = "";
 
-            if (parsed.length === 0) {
-                alert("テキストから日付とカロリー数値を検出できませんでした。書式を確認してください。");
-                previewBox.classList.add("hidden");
-                return;
-            }
+            if (parsed.length > 0) {
+                if (manualInput && document.activeElement !== manualInput) {
+                    manualInput.value = parsed[0].intake;
+                }
+                if (countEl) countEl.textContent = `${parsed.length}件検出`;
 
-            parsed.forEach(item => {
-                const activity = (decryptedData.dailyActivity && decryptedData.dailyActivity[item.date]) ? decryptedData.dailyActivity[item.date] : null;
-                const burned = activity && activity.steps ? Math.round(1800 + (activity.steps * 0.04)) : 2300;
-                const bal = item.intake - burned;
-                const tr = document.createElement("tr");
-                tr.className = "border-b border-slate-800/60";
-                tr.innerHTML = `
-                    <td class="py-1 px-2 font-mono text-white">${item.date}</td>
-                    <td class="py-1 px-2 text-blue-300 font-bold">${item.intake.toLocaleString()}</td>
-                    <td class="py-1 px-2 text-purple-300 font-bold">${burned.toLocaleString()}</td>
-                    <td class="py-1 px-2 font-bold ${bal <= 0 ? 'text-emerald-400' : 'text-rose-400'}">${bal <= 0 ? '' : '+'}${bal.toLocaleString()}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            previewBox.classList.remove("hidden");
+                parsed.forEach(item => {
+                    const activity = (decryptedData.dailyActivity && decryptedData.dailyActivity[item.date]) ? decryptedData.dailyActivity[item.date] : null;
+                    const burned = activity && activity.steps ? Math.round(1800 + (activity.steps * 0.04)) : 2300;
+                    const bal = item.intake - burned;
+                    const tr = document.createElement("tr");
+                    tr.className = "border-b border-slate-800/60";
+                    tr.innerHTML = `
+                        <td class="py-1.5 px-2 font-mono text-white">${item.date}</td>
+                        <td class="py-1.5 px-2 text-emerald-300 font-bold">${item.intake.toLocaleString()}</td>
+                        <td class="py-1.5 px-2 text-purple-300 font-bold">${burned.toLocaleString()}</td>
+                        <td class="py-1.5 px-2 font-bold ${bal <= 0 ? 'text-emerald-400' : 'text-rose-400'}">${bal <= 0 ? '' : '+'}${bal.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                previewBox.classList.remove("hidden");
+            } else {
+                // If user entered a manual calorie value
+                const manualVal = parseInt(manualInput?.value || "0");
+                if (manualVal > 0) {
+                    if (countEl) countEl.textContent = "1件（手動入力）";
+                    const d = targetDate;
+                    const burned = 2300;
+                    const bal = manualVal - burned;
+                    tbody.innerHTML = `
+                        <tr class="border-b border-slate-800/60">
+                            <td class="py-1.5 px-2 font-mono text-white">${d}</td>
+                            <td class="py-1.5 px-2 text-emerald-300 font-bold">${manualVal.toLocaleString()} (手入力)</td>
+                            <td class="py-1.5 px-2 text-purple-300 font-bold">${burned.toLocaleString()}</td>
+                            <td class="py-1.5 px-2 font-bold ${bal <= 0 ? 'text-emerald-400' : 'text-rose-400'}">${bal <= 0 ? '' : '+'}${bal.toLocaleString()}</td>
+                        </tr>
+                    `;
+                    previewBox.classList.remove("hidden");
+                } else {
+                    if (countEl) countEl.textContent = "0件";
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-2 text-center text-slate-500">テキストまたは数値を入力するとプレビューが表示されます</td></tr>`;
+                }
+            }
         }
 
         function saveCicoData() {
             const raw = document.getElementById("cicoTextInput").value;
-            const parsed = CicoManager.parseMealText(raw);
+            const targetDate = document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
+            let parsed = CicoManager.parseMealText(raw, targetDate);
+
+            // If text parsing yielded nothing, check manual calorie input box
+            const manualVal = parseInt(document.getElementById("cicoManualCalorie")?.value || "0");
+            if (parsed.length === 0 && manualVal >= 100) {
+                parsed = [{ date: targetDate, intake: manualVal }];
+            }
+
             if (parsed.length === 0) {
-                alert("取り込むデータがありません。テキストを入力してください。");
+                alert("取り込むデータがありません。テキストを入力するか、カロリー数値を直接入力してください。");
                 return;
             }
+
             if (!decryptedData.cico) decryptedData.cico = CicoManager.getDefaultCicoData();
             parsed.forEach(p => {
                 decryptedData.cico[p.date] = { intake: p.intake };
             });
+
             LocalDataManager.save('health_dash_cico', decryptedData.cico);
             CicoManager.render();
             closeCicoModal();
-            alert(`🎉 ${parsed.length}日分の食事カロリー記録を取り込みました！`);
+            alert(`🎉 ${parsed.length}日分の食事カロリー記録（合計 ${parsed.reduce((s,x)=>s+x.intake,0).toLocaleString()} kcal）を取り込みました！`);
         }
 
         // ==========================================
