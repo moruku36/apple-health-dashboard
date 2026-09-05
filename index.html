@@ -22,7 +22,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="build-version" content="1788300000">
+    <meta name="build-version" content="1788350000">
     
     <title>Health Dash - Apple Watch & 体組成計</title>
     
@@ -31,9 +31,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="HealthDash">
     <meta name="theme-color" content="#0B1120" id="metaThemeColor">
-    <link rel="manifest" href="manifest.json?v=1788300000">
-    <link rel="icon" type="image/svg+xml" href="icon.svg?v=1788300000">
-    <link rel="apple-touch-icon" href="icon.svg?v=1788300000">
+    <link rel="manifest" href="manifest.json?v=1788350000">
+    <link rel="icon" type="image/svg+xml" href="icon.svg?v=1788350000">
+    <link rel="apple-touch-icon" href="icon.svg?v=1788350000">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -231,7 +231,7 @@
         <!-- Header -->
         <header class="glass-card p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-3">
-                <img src="icon.svg?v=1788300000" alt="App Icon" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl shadow-md">
+                <img src="icon.svg?v=1788350000" alt="App Icon" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl shadow-md">
                 <div>
                     <h1 class="text-lg sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                         Health Dashboard
@@ -1198,7 +1198,7 @@
                             <h3 id="wrWeekTitle" class="text-xl sm:text-2xl font-black tracking-tight text-white mt-1">今週の通信簿</h3>
                             <div id="wrDateRange" class="text-xs text-slate-300 mt-0.5">2026年 8月22日 〜 8月28日</div>
                         </div>
-                        <img src="icon.svg?v=1788300000" alt="Icon" class="w-10 h-10 rounded-2xl shadow-md border border-white/20">
+                        <img src="icon.svg?v=1788350000" alt="Icon" class="w-10 h-10 rounded-2xl shadow-md border border-white/20">
                     </div>
 
                     <!-- 称号バッジ -->
@@ -1623,7 +1623,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- ⚡ iPhone「ショートカット」1タップ同期モーダル -->
@@ -3683,24 +3682,68 @@
         }
         function parseAndPreviewCico() {
             const raw = document.getElementById("cicoTextInput")?.value || "";
+            const targetDate = document.getElementById("cicoTargetDate")?.value || new Date().toISOString().split("T")[0];
             const manualInput = document.getElementById("cicoManualCalorie");
+            const previewBox = document.getElementById("cicoPreviewBox");
+            const tbody = document.getElementById("cicoPreviewTbody");
+            const countEl = document.getElementById("cicoPreviewCount");
             const statusEl = document.getElementById("cicoDetectionStatus");
             const detailEl = document.getElementById("cicoBreakdownDetail");
 
-            if (!raw.trim()) {
-                if (statusEl) statusEl.textContent = "待機中";
-                if (detailEl) detailEl.textContent = "テキストを貼り付けると自動解析されます。直接数値を入力することも可能です。";
-                return;
+            if (tbody) tbody.innerHTML = "";
+
+            // 1. Calculate burned calories for target date
+            let burned = 2300;
+            if (typeof decryptedData !== 'undefined' && decryptedData && decryptedData.dailyActivity && decryptedData.dailyActivity[targetDate]) {
+                const act = decryptedData.dailyActivity[targetDate];
+                burned = act.steps ? Math.round(1800 + (act.steps * 0.04)) : 2300;
             }
 
+            // 2. Extract calories from text
             const res = CicoManager.extractCaloriesSmart(raw);
+            let intakeVal = 0;
+
             if (res.calories > 0) {
-                if (manualInput) manualInput.value = res.calories;
+                intakeVal = res.calories;
+                if (manualInput && document.activeElement !== manualInput) {
+                    manualInput.value = intakeVal;
+                }
                 if (statusEl) statusEl.textContent = `✅ 自動検出 (${res.items.length}件)`;
-                if (detailEl) detailEl.innerHTML = `<span class="text-emerald-400 font-bold">${res.calories.toLocaleString()} kcal</span>: ${res.reason}`;
+                if (detailEl) detailEl.innerHTML = `<span class="text-emerald-400 font-bold">${intakeVal.toLocaleString()} kcal</span>: ${res.reason}`;
             } else {
-                if (statusEl) statusEl.textContent = "⚠️ 数値要入力";
-                if (detailEl) detailEl.textContent = res.reason;
+                // If text is empty or unparsed, check manual input
+                const manualVal = parseInt(manualInput?.value || "0");
+                if (manualVal > 0) {
+                    intakeVal = manualVal;
+                    if (statusEl) statusEl.textContent = "✏️ 手動入力モード";
+                    if (detailEl) detailEl.textContent = `手動指定された ${manualVal.toLocaleString()} kcal で登録します。`;
+                } else {
+                    if (statusEl) statusEl.textContent = "待機中";
+                    if (detailEl) detailEl.textContent = "テキストを貼り付けると即座に解析されます。直接数値を入力することも可能です。";
+                }
+            }
+
+            // 3. Update Preview Table row
+            if (tbody) {
+                if (intakeVal > 0) {
+                    const balance = intakeVal - burned;
+                    const balSign = balance <= 0 ? '' : '+';
+                    const balColor = balance <= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+                    const tr = document.createElement("tr");
+                    tr.className = "border-b border-slate-800/60 transition bg-slate-900/30";
+                    tr.innerHTML = `
+                        <td class="py-2 px-2 font-mono text-white font-bold">${targetDate}</td>
+                        <td class="py-2 px-2 text-emerald-300 font-black">${intakeVal.toLocaleString()} kcal</td>
+                        <td class="py-2 px-2 text-purple-300 font-semibold">${burned.toLocaleString()} kcal</td>
+                        <td class="py-2 px-2 ${balColor}">${balSign}${balance.toLocaleString()} kcal</td>
+                    `;
+                    tbody.appendChild(tr);
+                    if (countEl) countEl.textContent = res.items.length > 0 ? `${res.items.length}項目合算（1日分）` : "1件（手動設定）";
+                    if (previewBox) previewBox.classList.remove("hidden");
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-3 text-center text-slate-500">テキストを貼り付けるか数値を入力すると、ここに収支プレビューが表示されます</td></tr>`;
+                    if (countEl) countEl.textContent = "0件";
+                }
             }
         }
         function saveCicoData() {
