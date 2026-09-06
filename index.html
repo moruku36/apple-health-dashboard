@@ -668,23 +668,23 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
                         <div class="text-[11px] font-medium text-slate-400">今月の累計アンダーカロリー</div>
-                        <div class="text-lg sm:text-xl font-black text-emerald-400 mt-1" id="cicoMonthlyDeficit">-14,400 <span class="text-xs font-normal text-slate-400">kcal</span></div>
-                        <div class="text-[10px] text-emerald-400/80 mt-0.5" id="cicoFatLossEstimate">🔥 脂肪約 -2.0kg 相当</div>
+                        <div class="text-lg sm:text-xl font-black text-emerald-400 mt-1" id="cicoMonthlyDeficit">— <span class="text-xs font-normal text-slate-400">kcal</span></div>
+                        <div class="text-[10px] text-emerald-400/80 mt-0.5" id="cicoFatLossEstimate">食事記録を取り込むと計算されます</div>
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
                         <div class="text-[11px] font-medium text-slate-400">1日平均 摂取カロリー</div>
-                        <div class="text-lg sm:text-xl font-black text-white mt-1" id="cicoAvgIntake">1,850 <span class="text-xs font-normal text-slate-400">kcal</span></div>
+                        <div class="text-lg sm:text-xl font-black text-white mt-1" id="cicoAvgIntake">— <span class="text-xs font-normal text-slate-400">kcal</span></div>
                         <div class="text-[10px] text-slate-400 mt-0.5">チャッピー記録平均</div>
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
                         <div class="text-[11px] font-medium text-slate-400">1日平均 消費カロリー</div>
-                        <div class="text-lg sm:text-xl font-black text-white mt-1" id="cicoAvgBurned">2,330 <span class="text-xs font-normal text-slate-400">kcal</span></div>
+                        <div class="text-lg sm:text-xl font-black text-white mt-1" id="cicoAvgBurned">— <span class="text-xs font-normal text-slate-400">kcal</span></div>
                         <div class="text-[10px] text-blue-400 mt-0.5">Apple Watch計測</div>
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
                         <div class="text-[11px] font-medium text-slate-400">アンダーカロリー達成率</div>
-                        <div class="text-lg sm:text-xl font-black text-amber-400 mt-1" id="cicoDeficitRate">87 <span class="text-xs font-normal text-slate-400">%</span></div>
-                        <div class="text-[10px] text-slate-400 mt-0.5" id="cicoDeficitDays">26日 / 30日 達成</div>
+                        <div class="text-lg sm:text-xl font-black text-amber-400 mt-1" id="cicoDeficitRate">— <span class="text-xs font-normal text-slate-400">%</span></div>
+                        <div class="text-[10px] text-slate-400 mt-0.5" id="cicoDeficitDays">記録なし</div>
                     </div>
                 </div>
 
@@ -696,7 +696,7 @@
                     <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-slate-300 flex items-start gap-2.5">
                         <i class="fa-solid fa-lightbulb text-emerald-400 text-sm mt-0.5"></i>
                         <div id="cicoInsightText">
-                            理論値の体脂肪減少（-2.0kg）に対し、最新の体組成測定では体重減少を記録！食事コントロールと運動の相乗効果が確認できます。
+                            食事記録（チャッピー）を取り込むと、消費カロリーとのバランスや理論上の体脂肪変化が表示されます。
                         </div>
                     </div>
                 </div>
@@ -1854,6 +1854,17 @@
                 .trim();
         }
 
+        function setTheme(name, save = true) {
+            const html = document.documentElement;
+            ['midnight','oled','emerald'].forEach(t => html.classList.remove('theme-' + t));
+            html.classList.add('theme-' + name);
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.style.fontWeight = btn.dataset.theme === name ? '900' : '';
+                btn.style.outline = btn.dataset.theme === name ? '2px solid #38BDF8' : '';
+            });
+            if (save) localStorage.setItem('health_dash_theme', name);
+        }
+
         window.addEventListener("DOMContentLoaded", () => {
             const savedTheme = localStorage.getItem("health_dash_theme") || "midnight";
             setTheme(savedTheme, false);
@@ -1861,14 +1872,14 @@
 
             // 直接ダッシュボードを起動
             decryptedData = HEALTH_DATA;
-            LocalDataManager.init();
-            initDashboard(decryptedData);
+            try { LocalDataManager.init(); } catch(e) { console.warn('LocalDataManager.init error:', e); }
+            try { initDashboard(decryptedData); } catch(e) { console.error('initDashboard error:', e); }
 
             // 全新機能の初期化
-            CicoManager.render();
-            RpgManager.render();
-            CorrelationManager.render();
-            YoyManager.render();
+            try { CicoManager.render(); } catch(e) { console.warn('CicoManager.render error:', e); }
+            try { RpgManager.render(); } catch(e) { console.warn('RpgManager.render error:', e); }
+            try { CorrelationManager.render(); } catch(e) { console.warn('CorrelationManager.render error:', e); }
+            try { YoyManager.render(); } catch(e) { console.warn('YoyManager.render error:', e); }
             SundayReportEnhancer.checkSunday();
 
             // 体組成計タブを一番最初に開く
@@ -2501,7 +2512,7 @@
             });
 
             // グラフ描画
-            renderBodyCompCharts(history, targetEntry);
+            try { renderBodyCompCharts(history, targetEntry); } catch(e) { console.warn('bodycomp chart error:', e); }
             updateSimulation();
         }
 
@@ -3553,7 +3564,24 @@
             },
             render() {
                 if (!decryptedData) return;
-                const cicoData = decryptedData.cico || this.getDefaultCicoData();
+                const cicoData = decryptedData.cico;
+
+                // If no real CICO data saved yet, show placeholder state
+                if (!cicoData || Object.keys(cicoData).length === 0) {
+                    const defEl = document.getElementById('cicoMonthlyDeficit');
+                    const fatEl = document.getElementById('cicoFatLossEstimate');
+                    const avgIntEl = document.getElementById('cicoAvgIntake');
+                    const avgBurnEl = document.getElementById('cicoAvgBurned');
+                    const rateEl = document.getElementById('cicoDeficitRate');
+                    const daysEl = document.getElementById('cicoDeficitDays');
+                    if (defEl) defEl.innerHTML = '— <span class="text-xs font-normal text-slate-400">kcal</span>';
+                    if (fatEl) fatEl.textContent = '食事記録を取り込むと計算されます';
+                    if (avgIntEl) avgIntEl.innerHTML = '— <span class="text-xs font-normal text-slate-400">kcal</span>';
+                    if (avgBurnEl) avgBurnEl.innerHTML = '— <span class="text-xs font-normal text-slate-400">kcal</span>';
+                    if (rateEl) rateEl.innerHTML = '— <span class="text-xs font-normal text-slate-400">%</span>';
+                    if (daysEl) daysEl.textContent = '記録なし';
+                    return;
+                }
 
                 // Compute metrics
                 const entries = Object.entries(cicoData).sort((a, b) => a[0].localeCompare(b[0]));
